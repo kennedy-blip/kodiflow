@@ -28,7 +28,7 @@ jobs:
             exit 1
           fi
           set -o pipefail
-          sdkmanager 'platforms;android-34' 'build-tools;34.0.0' 2>&1 | tee /tmp/sdk.log || { tail -30 /tmp/sdk.log | while IFS= read -r line; do echo "::error::$line"; done; exit 1; }
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-34' 'build-tools;34.0.0' 2>&1 | tee /tmp/sdk.log || { tail -30 /tmp/sdk.log | while IFS= read -r line; do echo "::error::$line"; done; exit 1; }
 
       - run: npm ci
       - run: npm test
