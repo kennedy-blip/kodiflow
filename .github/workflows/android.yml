@@ -6,7 +6,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -43,3 +43,20 @@ jobs:
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Verify and publish debug APK to this branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/arena/f26ed7b8-kodiflow'
+        run: |
+          apk=android/app/build/outputs/apk/debug/app-debug.apk
+          unzip -t "$apk" >/dev/null
+          unzip -l "$apk" | grep -q 'AndroidManifest.xml'
+          unzip -l "$apk" | grep -q 'classes.dex'
+          jarsigner -verify "$apk" >/dev/null
+          cp "$apk" public/kodiflow.apk
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f public/kodiflow.apk
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish Android debug APK'
+            git push origin HEAD:"refs/heads/$GITHUB_REF_NAME"
+          fi

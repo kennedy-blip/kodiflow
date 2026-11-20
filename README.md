@@ -22,7 +22,7 @@ npm ci
 npm run cap:apk
 ```
 
-This builds `android/app/build/outputs/apk/debug/app-debug.apk`. Debug builds are not production-signed. For distribution, open `npm run cap:open` in Android Studio and generate a signed release APK, then copy that binary to `public/kodiflow.apk` and redeploy. **No APK binary is included**; the download control reports when it is missing. The GitHub Actions Android workflow can also build a debug APK as a downloadable workflow artifact. That workflow has not been run in this environment; it does not publish to Vercel or produce a production-signed release.
+This builds `android/app/build/outputs/apk/debug/app-debug.apk`. Debug builds are not production-signed. For distribution, open `npm run cap:open` in Android Studio and generate a signed release APK, then copy that binary to `public/kodiflow.apk` and redeploy. The GitHub Actions workflow builds a debug APK, validates it and publishes it to this working branch as `public/kodiflow.apk` for the website to serve. This is a test build, not a production-signed release. A fresh debug signing key may be used on each build, so upgrades over an earlier build may require uninstalling it first; uninstalling can erase local app data.
 
 ## Important limitations
 
@@ -30,4 +30,4 @@ The role switcher is a local UI mode, not authentication or a security boundary.
 
 Backups contain private tenant and financial information in unencrypted JSON. Restore replaces all local records after confirmation; invalid backups are rejected before the database is changed. Meter readings must continue from the last recorded value; meter replacement or rollover requires manual correction outside this prototype.
 
-The Android workflow builds on a GitHub-hosted runner; it must be enabled and run in the repository before its artifact exists. Production releases require an appropriately signed APK and a deliberate deployment of that file.
+The Android workflow builds on a GitHub-hosted runner and also uploads a debug APK as a workflow artifact. Production releases require a stable, securely held signing key and a deliberate release process. The Capacitor sync script removes the downloadable APK from the native app assets to avoid embedding the APK inside itself.
