@@ -21,12 +21,21 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: android-actions/setup-android@v3
-      - name: Install Android SDK 34
-        run: sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
+      - name: Verify Android SDK
+        run: |
+          if [ -z "${ANDROID_HOME:-}" ] || [ ! -x "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+            echo '::error::Android SDK or sdkmanager is missing on the runner'
+            exit 1
+          fi
+          set -o pipefail
+          sdkmanager 'platforms;android-34' 'build-tools;34.0.0' 2>&1 | tee /tmp/sdk.log || { tail -30 /tmp/sdk.log | while IFS= read -r line; do echo "::error::$line"; done; exit 1; }
+
       - run: npm ci
       - run: npm test
-      - run: npm run cap:apk
+      - name: Build APK
+        run: |
+          set -o pipefail
+          npm run cap:apk 2>&1 | tee /tmp/apk-build.log || { tail -50 /tmp/apk-build.log | while IFS= read -r line; do echo "::error::$line"; done; exit 1; }
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
