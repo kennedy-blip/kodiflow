@@ -1,0 +1,21 @@
+name: Verify deployed KodiFlow
+on:
+  push:
+    branches: ['arena/f26ed7b8-kodiflow']
+    paths: ['.github/workflows/verify-deployment.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify website and APK
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 3 https://kodiflow-smoky.vercel.app/ -o /tmp/index.html
+          grep -q 'KodiFlow' /tmp/index.html || { echo '::error::Website did not return KodiFlow'; exit 1; }
+          curl -fsSL --retry 3 https://kodiflow-smoky.vercel.app/kodiflow.apk -o /tmp/kodiflow.apk
+          test "$(sha256sum /tmp/kodiflow.apk | cut -d' ' -f1)" = "$(sha256sum public/kodiflow.apk | cut -d' ' -f1)" || { echo '::error::Deployed APK does not match the checked-in APK'; exit 1; }
+          unzip -t /tmp/kodiflow.apk >/dev/null
+          echo 'Website and published APK verified.'
