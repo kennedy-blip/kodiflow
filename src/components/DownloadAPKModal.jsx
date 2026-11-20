@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Download, Smartphone, ShieldCheck, WifiOff, Terminal, Copy, Check, Loader2, Package } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { Capacitor } from '@capacitor/core';
 
 export default function DownloadAPKModal({ open, onClose }) {
   const { showToast } = useApp();
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const isNative = Capacitor.isNativePlatform();
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -58,7 +60,7 @@ export default function DownloadAPKModal({ open, onClose }) {
               {[
                 { icon: WifiOff, label: '100% Offline', sub: 'IndexedDB' },
                 { icon: ShieldCheck, label: 'Private', sub: 'On-device data' },
-                { icon: Package, label: 'Android', sub: 'Build required' }
+                { icon: Package, label: 'Android', sub: 'Debug build' }
               ].map((f) => (
                 <div key={f.label} className="kf-card p-3">
                   <f.icon size={18} className="mx-auto text-blue-400" />
@@ -68,17 +70,17 @@ export default function DownloadAPKModal({ open, onClose }) {
               ))}
             </div>
 
-            <button onClick={handleDownload} disabled={downloading} className="kf-btn kf-btn-primary w-full mt-5 !py-3.5 !text-base animate-pulse-glow">
+            {!isNative && <button onClick={handleDownload} disabled={downloading} className="kf-btn kf-btn-primary w-full mt-5 !py-3.5 !text-base animate-pulse-glow">
               {downloading ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
               {downloading ? 'Preparing download…' : 'Download Android APK'}
-            </button>
-            <p className="text-[11px] kf-muted text-center mt-2">A compiled APK must be published at /kodiflow.apk before downloading.</p>
+            </button>}
+            <p className="text-[11px] kf-muted text-center mt-2">{isNative ? 'You are already using the Android app. Open the KodiFlow website in a browser to download an APK.' : 'Debug build for testing. Android may ask you to allow installation from your browser.'}</p>
 
             <div className="kf-divider my-5" />
             <div className="flex items-center gap-2 text-sm font-bold"><Terminal size={16} className="text-blue-400" /> Build your own signed APK</div>
             <p className="text-xs kf-muted mt-1">Maintainers can compile a fresh APK from source with Capacitor:</p>
             <div className="mt-3 space-y-2">
-              {['npm install', 'npm run build', 'npx cap sync android', 'npx cap open android  # then Build → Generate Signed Bundle/APK'].map((cmd) => (
+              {['npm install', 'npm run build', 'npm run cap:sync', 'npx cap open android  # then Build → Generate Signed Bundle/APK'].map((cmd) => (
                 <div key={cmd} className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-mono" style={{ background: 'var(--kf-input)', border: '1px solid var(--kf-border)' }}>
                   <span className="flex-1 truncate">{cmd}</span>
                   <button onClick={() => copyCmd(cmd)} className="kf-btn kf-btn-ghost !p-1.5" aria-label="Copy command">{copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}</button>

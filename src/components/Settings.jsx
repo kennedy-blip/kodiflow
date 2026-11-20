@@ -73,7 +73,7 @@ export default function Settings({ onOpenApk }) {
             <span className="p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-500 text-white"><Smartphone size={22} /></span>
             <div>
               <h3 className="font-display font-bold">KodiFlow for Android</h3>
-              <p className="text-xs kf-muted">Android • Offline-first • Build from source</p>
+              <p className="text-xs kf-muted">Android • Offline-first • Debug build</p>
             </div>
           </div>
           <button onClick={onOpenApk} className="kf-btn kf-btn-primary !py-3 animate-pulse-glow"><Download size={18} /> Download Android APK</button>
